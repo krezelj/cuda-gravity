@@ -1,6 +1,6 @@
 #pragma once
 
-#include "utils.cuh";
+#include "utils.cuh"
 
 struct BodyArray
 {
@@ -23,7 +23,7 @@ struct BodyArray
 
         for (int i = 0; i < N; i++)
         {
-            this->Gm[i] = G * masses[i];
+            this->Gm[i] = GRAVITATIONAL_CONSTANT * masses[i];
 
             this->x[i] = x[i];
             this->y[i] = y[i];
@@ -49,6 +49,6 @@ struct BodyArray
         float x1 = x[i], y1 = y[i];
         float x2 = x[j], y2 = y[j];
 
-        return (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y2);
+        return (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
     }
 };

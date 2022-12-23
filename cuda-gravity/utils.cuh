@@ -1,3 +1,3 @@
 #pragma once
 
-#define G 6.67384e-11
+#define GRAVITATIONAL_CONSTANT 6.67384e-11f

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "body_array.cuh";
+#include "body_array.h"
 
 const int GB_USE_CPU = 0;
 const int GB_USE_GPU = 1;
