@@ -1,9 +1,13 @@
 #pragma once
 
+#include "cuda_runtime.h"
+#include "device_launch_parameters.h"
+
 #include "body_array.h"
 
-const int GB_USE_CPU = 0;
-const int GB_USE_GPU = 1;
+typedef int GB_MODE;
+const GB_MODE GB_USE_CPU = 0;
+const GB_MODE GB_USE_GPU = 1;
 
 class GravityBox
 {
@@ -15,15 +19,19 @@ public:
 
 	GravityBox(BodyArray* bodies, float delta_t);
 
-	void UpdateSimulation();
+	void UpdateSimulation(GB_MODE mode);
 
 private:
 
 	float* ax;
 	float* ay;
 
-	void UpdateAccelerations();
-	void UpdateVelocities();
-	void UpdatePositions();
+	void UpdateAccelerationsCPU();
+	void UpdateVelocitiesCPU();
+	void UpdatePositionsCPU();
+
+	__host__ void UpdateAccelerationsGPU();
+	__host__ void UpdateVelocitiesGPU();
+	__host__ void UpdatePositionsGPU();
 
 };

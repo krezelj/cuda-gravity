@@ -79,7 +79,8 @@
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <CudaCompile Include="gravity_box.cu" />
+    <CudaCompile Include="gravity_box_cpu.cpp" />
+    <CudaCompile Include="gravity_box_gpu.cu" />
     <CudaCompile Include="kernel.cu" />
   </ItemGroup>
   <ItemGroup>
@@ -89,6 +90,7 @@
     <ClInclude Include="visualiser.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="gravity_box_common.cpp" />
     <ClCompile Include="visualiser.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

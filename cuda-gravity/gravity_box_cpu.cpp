@@ -1,23 +1,8 @@
 #include "gravity_box.cuh"
 #include <math.h>
 
-GravityBox::GravityBox(BodyArray* bodies, float delta_t) : bodies(bodies)
-{
-	this->delta_t = delta_t;
-	this->N = bodies->N;
 
-	ax = new float[N];
-	ay = new float[N];
-}
-
-void GravityBox::UpdateSimulation()
-{
-	UpdateAccelerations();
-	UpdateVelocities();
-	UpdatePositions();
-}
-
-void GravityBox::UpdateAccelerations()
+void GravityBox::UpdateAccelerationsCPU()
 {
 	// TODO See if there is a better way to do this
 	for (int i = 0; i < N; i++)
@@ -58,7 +43,7 @@ void GravityBox::UpdateAccelerations()
 	}
 }
 
-void GravityBox::UpdateVelocities()
+void GravityBox::UpdateVelocitiesCPU()
 {
 	for (int bodyIdx = 0; bodyIdx < N; bodyIdx++)
 	{
@@ -67,7 +52,7 @@ void GravityBox::UpdateVelocities()
 	}
 }
 
-void GravityBox::UpdatePositions()
+void GravityBox::UpdatePositionsCPU()
 {
 	for (int bodyIdx = 0; bodyIdx < N; bodyIdx++)
 	{
