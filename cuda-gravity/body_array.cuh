@@ -43,4 +43,12 @@ struct BodyArray
         delete[] vx;
         delete[] vy;
     }
+
+    float GetDistanceSquared(int i, int j)
+    {
+        float x1 = x[i], y1 = y[i];
+        float x2 = x[j], y2 = y[j];
+
+        return (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y2);
+    }
 };

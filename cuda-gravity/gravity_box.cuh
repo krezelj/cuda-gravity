@@ -11,8 +11,9 @@ public:
 
 	BodyArray* bodies;
 	float delta_t;
+	int N;
 
-	GravityBox(BodyArray* bodies);
+	GravityBox(BodyArray* bodies, float delta_t);
 
 	void UpdateSimulation();
 
