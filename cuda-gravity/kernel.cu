@@ -19,7 +19,7 @@
 
 int main()
 {
-    int N = 7000;
+    int N = 1000;
     float* masses = new float[N + 2];
     float* x = new float[N + 2];
     float* y = new float[N + 2];
@@ -85,8 +85,8 @@ int main()
     std::chrono::milliseconds duration_display;
 
     int iterations = 0;
-    int steps_per_update = 5;
-    while (window.isOpen())
+    int steps_per_update = 50;
+    while (window.isOpen() && iterations < 500)
     {
         sf::Event event;
         while (window.pollEvent(event))
@@ -95,7 +95,6 @@ int main()
                 window.close();
         }
 
-        
         // simulate
         start = std::chrono::high_resolution_clock::now();
 
@@ -108,7 +107,7 @@ int main()
         // draw
         start = std::chrono::high_resolution_clock::now();
         window.clear(sf::Color::Black);
-        visualiser.DisplayHeatmap(&window, 288 / 2); // 2 * 2 * 2 * 2 * 2 * 3 * 3 * 3
+        visualiser.DisplayHeatmap(&window, 288); // 2 * 2 * 2 * 2 * 2 * 3 * 3 * 3
         // visualiser.DisplayParticles(&window);
         window.display();
 

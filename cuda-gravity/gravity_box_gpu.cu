@@ -92,15 +92,6 @@ __host__ void GravityBox::UpdateSimulationGPU(int n_steps)
 		fprintf(stderr, "cudaMemcpy failed!");
 	}
 	bodies->HandleCollisions(collision);
-
-	
-
-	//// system("cls");
-	//for (int bodyIdx = 0; bodyIdx < N; bodyIdx++)
-	//{
-	//	printf("%f, %f\n", bodies->x[bodyIdx], bodies->y[bodyIdx]);
-	//}
-
 }
 
 __global__ void CheckCollisions(float* position_x, float* position_y, float* g_mass, int* collision, int K)
@@ -151,7 +142,6 @@ __global__ void UpdateAccelerationGPU(float* g_masses, float* position_x, float*
 {
 	int globalIdxX = threadIdx.x + blockIdx.x * blockDim.x;
 	int globalIdxY = threadIdx.y + blockIdx.y * blockDim.y;
-	// int globalIdxZ = threadIdx.z;
 
 	if (globalIdxX >= N && globalIdxY >= N)
 	{
@@ -162,7 +152,6 @@ __global__ void UpdateAccelerationGPU(float* g_masses, float* position_x, float*
 	__shared__ float s_other_body_x[CHUNK_SIZE];
 	__shared__ float s_other_body_y[CHUNK_SIZE];
 
-	// __shared__ float this_body_gmass[CHUNK_SIZE];
 	__shared__ float s_this_body_x[CHUNK_SIZE];
 	__shared__ float s_this_body_y[CHUNK_SIZE];
 
@@ -177,19 +166,6 @@ __global__ void UpdateAccelerationGPU(float* g_masses, float* position_x, float*
 
 		s_this_body_x[threadIdx.y] = position_x[globalIdxY];
 		s_this_body_y[threadIdx.y] = position_y[globalIdxY];
-
-		//if (threadIdx.z == 0)
-		//{
-		//	s_other_body_gmass[threadIdx.x] = g_masses[globalIdxX];
-		//	s_other_body_x[threadIdx.x] = position_x[globalIdxX];
-		//	s_other_body_y[threadIdx.x] = position_y[globalIdxX];
-		//}
-		//else // 8 * 32 threads per layer so warps do not overlap different layers
-		//{
-		//	// this_body_gmass[threadIdx.y] = g_masses[globalIdxY];
-		//	s_this_body_x[threadIdx.y] = position_x[globalIdxY];
-		//	s_this_body_y[threadIdx.y] = position_y[globalIdxY];
-		//}
 	}
 
 	__syncthreads();
@@ -207,8 +183,6 @@ __global__ void UpdateAccelerationGPU(float* g_masses, float* position_x, float*
 	}
 	else 
 	{
-		// calculate distance
-		
 		float dx = s_other_body_x[threadIdx.x] - s_this_body_x[threadIdx.y];
 		float dy = s_other_body_y[threadIdx.x] - s_this_body_y[threadIdx.y];
 		float r2 = dx * dx + dy * dy;
@@ -217,32 +191,11 @@ __global__ void UpdateAccelerationGPU(float* g_masses, float* position_x, float*
 		float a = s_other_body_gmass[threadIdx.x] / r2;
 		s_acceleration[threadIdx.x][threadIdx.y][0] = a * dx / r;
 		s_acceleration[threadIdx.x][threadIdx.y][1] = a * dy / r;
-
-		//if (threadIdx.z == 0)
-		//{
-		//	// ax
-		//	s_acceleration[threadIdx.x][threadIdx.y][threadIdx.z] = a * dx / r;
-		//}
-		//else
-		//{
-		//	// ay
-		//	s_acceleration[threadIdx.x][threadIdx.y][threadIdx.z] = a * dy / r;
-		//}
 	}
 
 	__syncthreads();
 
-	// in-block parallel sum
-	/*if (threadIdx.x < 16 && globalIdxX + 16 < N)
-	{
-		s_acceleration[threadIdx.x][threadIdx.y][0] += s_acceleration[threadIdx.x + 16][threadIdx.y][0];
-		s_acceleration[threadIdx.x][threadIdx.y][1] += s_acceleration[threadIdx.x + 16][threadIdx.y][1];
-	}*/
-	/*if (threadIdx.x < 8 && globalIdxX + 8 < N)
-	{
-		s_acceleration[threadIdx.x][threadIdx.y][0] += s_acceleration[threadIdx.x + 8][threadIdx.y][0];
-		s_acceleration[threadIdx.x][threadIdx.y][1] += s_acceleration[threadIdx.x + 8][threadIdx.y][1];
-	}*/
+	//// in-block parallel sum
 	if (threadIdx.x < 4 && globalIdxX + 4 < N)
 	{
 		s_acceleration[threadIdx.x][threadIdx.y][0] += s_acceleration[threadIdx.x + 4][threadIdx.y][0];
@@ -264,9 +217,9 @@ __global__ void UpdateAccelerationGPU(float* g_masses, float* position_x, float*
 	if (threadIdx.x == 0)
 	{
 		// int data_idx = globalIdxY * gridDim.x * blockDim.z + blockIdx.x * blockDim.z + threadIdx.z;
-
 		// acceleration_data[data_idx] = s_acceleration[0][threadIdx.y][threadIdx.z];
-		atomicAdd(&acceleration_data[2 * globalIdxY], s_acceleration[0][threadIdx.y][0]);
-		atomicAdd(&acceleration_data[2 * globalIdxY + 1], s_acceleration[0][threadIdx.y][1]);
+
+		// atomicAdd(&acceleration_data[2 * globalIdxY], s_acceleration[0][threadIdx.y][0]);
+		// atomicAdd(&acceleration_data[2 * globalIdxY + 1], s_acceleration[0][threadIdx.y][1]);
 	}
 }
