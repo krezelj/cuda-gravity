@@ -8,13 +8,13 @@ class Visualiser
 public:
 
 	BodyArray* bodies;
-	int N;
+	int* N;
 
 	int size;
 	float resolution;
 
-	Visualiser(BodyArray* bodies, int size, float resolution) : 
-		bodies(bodies), N(bodies->N), size(size), resolution(resolution) {}
+	Visualiser(BodyArray* bodies, int size, float real_size) : 
+		bodies(bodies), N(&(bodies->N)), size(size), resolution(real_size / size) {}
 
 	void DisplayParticles(sf::RenderWindow* window);
 	void DisplayHeatmap(sf::RenderWindow* window, int grid_size);
