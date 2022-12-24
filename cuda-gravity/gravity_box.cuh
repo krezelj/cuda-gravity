@@ -15,7 +15,7 @@ public:
 
 	BodyArray* bodies;
 	float delta_t;
-	int N;
+	int* N;
 
 	GravityBox(BodyArray* bodies, float delta_t);
 	~GravityBox();
@@ -26,10 +26,10 @@ private:
 	
 	float* ax;
 	float* ay;
+	int* collision;
 
 	void UpdateAccelerationsCPU();
-	void UpdateVelocitiesCPU();
-	void UpdatePositionsCPU();
+	void UpdateBodiesCPU();
 
 	float* d_acceleration;
 	float* d_g_mass;
@@ -37,6 +37,7 @@ private:
 	float* d_position_y;
 	float* d_velocity_x;
 	float* d_velocity_y;
+	int* d_collision;
 
 	__host__ void UpdateSimulationGPU(int n_steps);
 };

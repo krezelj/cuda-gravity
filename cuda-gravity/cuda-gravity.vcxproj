@@ -90,6 +90,7 @@
     <ClInclude Include="visualiser.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="body_array.cpp" />
     <ClCompile Include="gravity_box_common.cu" />
     <ClCompile Include="visualiser.cpp" />
   </ItemGroup>

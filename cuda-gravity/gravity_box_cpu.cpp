@@ -5,17 +5,17 @@
 void GravityBox::UpdateAccelerationsCPU()
 {
 	// TODO See if there is a better way to do this
-	for (int i = 0; i < N; i++)
+	for (int i = 0; i < *N; i++)
 	{
 		ax[i] = 0;
 		ay[i] = 0;
 	}
 
-	for (int firstBodyIdx = 0; firstBodyIdx < N; firstBodyIdx++)
+	for (int firstBodyIdx = 0; firstBodyIdx < *N; firstBodyIdx++)
 	{
 		// since calculations are symmetric and calculating 
 		// square of distance, cos and sin are all expensive operations we will only calculate them once per pair
-		for (int secondBodyIdx = firstBodyIdx + 1; secondBodyIdx < N; secondBodyIdx++)
+		for (int secondBodyIdx = firstBodyIdx + 1; secondBodyIdx < *N; secondBodyIdx++)
 		{
 			float r2 = bodies->GetDistanceSquared(firstBodyIdx, secondBodyIdx);
 			float r = sqrtf(r2);
@@ -39,19 +39,13 @@ void GravityBox::UpdateAccelerationsCPU()
 	}
 }
 
-void GravityBox::UpdateVelocitiesCPU()
+void GravityBox::UpdateBodiesCPU()
 {
-	for (int bodyIdx = 0; bodyIdx < N; bodyIdx++)
+	for (int bodyIdx = 0; bodyIdx < *N; bodyIdx++)
 	{
 		bodies->vx[bodyIdx] += ax[bodyIdx] * delta_t;
 		bodies->vy[bodyIdx] += ay[bodyIdx] * delta_t;
-	}
-}
 
-void GravityBox::UpdatePositionsCPU()
-{
-	for (int bodyIdx = 0; bodyIdx < N; bodyIdx++)
-	{
 		bodies->x[bodyIdx] += bodies->vx[bodyIdx] * delta_t;
 		bodies->y[bodyIdx] += bodies->vy[bodyIdx] * delta_t;
 	}
