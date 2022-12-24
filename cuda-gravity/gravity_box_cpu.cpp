@@ -20,23 +20,19 @@ void GravityBox::UpdateAccelerationsCPU()
 			float r2 = bodies->GetDistanceSquared(firstBodyIdx, secondBodyIdx);
 			float r = sqrtf(r2);
 
-			float sin = sinf((bodies->y[secondBodyIdx] - bodies->y[firstBodyIdx]) / r);
-			float cos = sinf((bodies->x[secondBodyIdx] - bodies->x[firstBodyIdx]) / r);
+			float dx = bodies->x[secondBodyIdx] - bodies->x[firstBodyIdx];
+			float dy = bodies->y[secondBodyIdx] - bodies->y[firstBodyIdx];
+
+			float sin = dy / r;
+			float cos = dx / r;
 			
 			// calculate accelerations for the first body
-			float a = bodies->Gm[secondBodyIdx] / r2;
+			float a = bodies->g_mass[secondBodyIdx] / r2;
 			ax[firstBodyIdx] += a * cos;
 			ay[firstBodyIdx] += a * sin;
 
-			if (isnan(ax[firstBodyIdx]))
-			{
-				float x1 = bodies->x[firstBodyIdx], y1 = bodies->y[firstBodyIdx];
-				float x2 = bodies->x[secondBodyIdx], y2 = bodies->y[secondBodyIdx];
-				int a = 0;
-			}
-
 			// calculate accelerations for the second body
-			a = bodies->Gm[firstBodyIdx] / r2;
+			a = bodies->g_mass[firstBodyIdx] / r2;
 			ax[secondBodyIdx] -= a * cos; // minus instead of plus because trig functions are reversed
 			ay[secondBodyIdx] -= a * sin;
 		}

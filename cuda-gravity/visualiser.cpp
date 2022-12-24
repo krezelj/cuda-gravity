@@ -1,5 +1,6 @@
 #include "visualiser.h"
 #include <vector>
+#include <set>
 
 sf::Color GetColour(float t);
 
@@ -23,13 +24,15 @@ void Visualiser::DisplayParticles(sf::RenderWindow* window)
 void Visualiser::DisplayHeatmap(sf::RenderWindow* window, int grid_size)
 {
 	float bucket_length = size / grid_size;
-	int** body_count = new int*[grid_size];
+	float** mass_count = new float*[grid_size];
+	std::set<std::pair<int, int>> non_empty_blocks;
+
 	for (int i = 0; i < grid_size; i++)
 	{
-		body_count[i] = new int[grid_size];
+		mass_count[i] = new float[grid_size];
 		for (int j = 0; j < grid_size; j++)
 		{
-			body_count[i][j] = 0;
+			mass_count[i][j] = 0;
 		}
 	}
 		
@@ -43,34 +46,60 @@ void Visualiser::DisplayHeatmap(sf::RenderWindow* window, int grid_size)
 		{
 			int i = display_y / bucket_length;
 			int j = display_x / bucket_length;
-			body_count[i][j]++;
+			mass_count[j][i] += bodies->g_mass[bodyIdx];
+			non_empty_blocks.insert(std::make_pair(j, i));
 		}
 	}
 
 	// draw
-	for (int i = 0; i < grid_size; i++)
+	for (auto iterator : non_empty_blocks)
 	{
-		for (int j = 0; j < grid_size; j++)
-		{
-			sf::RectangleShape rect;
-			rect.setSize(sf::Vector2f(bucket_length, bucket_length));
-			rect.setPosition(i * bucket_length, j * bucket_length);
+		int j = iterator.first;
+		int i = iterator.second;
+		sf::RectangleShape rect;
+		rect.setSize(sf::Vector2f(bucket_length, bucket_length));
+		rect.setPosition(j * bucket_length, i * bucket_length);
 
-			// colour
-			float t = std::min(1.0f, sqrtf((float)body_count[j][i] * 5 / N));
-			// float t = std::min(1.0f, (float)body_count[j][i] * 10 / N);
-			sf::Color colour = GetColour(t);
-			rect.setFillColor(colour);
+		// colour
+		float t = logf(mass_count[j][i] / GRAVITATIONAL_CONSTANT) * 2 / logf(bodies->sum_g_mass / GRAVITATIONAL_CONSTANT);
+		t = std::min(1.0f, t);
+		// float t = std::min(1.0f, (float)body_count[j][i] * 10 / N);
+		sf::Color colour = GetColour(t);
+		rect.setFillColor(colour);
 
-			window->draw(rect);
-		}
+		window->draw(rect);
 	}
+
+	//for (int i = 0; i < grid_size; i++)
+	//{
+	//	for (int j = 0; j < grid_size; j++)
+	//	{
+	//		if (mass_count[j][i] == 0) 
+	//		{
+	//			// TODO Add threshold e.g. if less than 1% of all bodies are in the bucket don't draw it
+	//			continue;
+	//		}
+
+	//		sf::RectangleShape rect;
+	//		rect.setSize(sf::Vector2f(bucket_length, bucket_length));
+	//		rect.setPosition(i * bucket_length, j * bucket_length);
+
+	//		// colour
+	//		float t = logf(mass_count[j][i] / GRAVITATIONAL_CONSTANT) * 2 / logf(bodies->sum_g_mass / GRAVITATIONAL_CONSTANT);
+	//		t = std::min(1.0f, t);
+	//		// float t = std::min(1.0f, (float)body_count[j][i] * 10 / N);
+	//		sf::Color colour = GetColour(t);
+	//		rect.setFillColor(colour);
+
+	//		window->draw(rect);
+	//	}
+	//}
 
 	for (size_t i = 0; i < grid_size; ++i)
 	{
-		delete[] body_count[i];
+		delete[] mass_count[i];
 	}
-	delete[] body_count;
+	delete[] mass_count;
 }
 
 std::pair<float, float> Visualiser::GetWindowPosition(float x, float y)

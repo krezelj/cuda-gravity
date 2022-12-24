@@ -90,7 +90,7 @@
     <ClInclude Include="visualiser.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="gravity_box_common.cpp" />
+    <ClCompile Include="gravity_box_common.cu" />
     <ClCompile Include="visualiser.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

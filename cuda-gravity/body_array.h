@@ -5,15 +5,16 @@
 struct BodyArray
 {
     int N;
-    float* Gm;
+    float* g_mass;
     float* x;
     float* y;
     float* vx;
     float* vy;
+    float sum_g_mass;
 
     BodyArray(int N, float* masses, float* x, float* y, float* vx, float* vy) : N(N)
     {
-        this->Gm = new float[N];
+        this->g_mass = new float[N];
 
         this->x = new float[N];
         this->y = new float[N];
@@ -21,9 +22,11 @@ struct BodyArray
         this->vx = new float[N];
         this->vy = new float[N];
 
+        sum_g_mass = 0.0f;
         for (int i = 0; i < N; i++)
         {
-            this->Gm[i] = GRAVITATIONAL_CONSTANT * masses[i];
+            this->g_mass[i] = GRAVITATIONAL_CONSTANT * masses[i];
+            sum_g_mass += g_mass[i];
 
             this->x[i] = x[i];
             this->y[i] = y[i];
@@ -35,7 +38,7 @@ struct BodyArray
 
     ~BodyArray()
     {
-        delete[] Gm;
+        delete[] g_mass;
 
         delete[] x;
         delete[] y;
