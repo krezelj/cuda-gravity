@@ -35,12 +35,6 @@ int main()
     vx[N + 1] = 0;
     vy[N + 1] = -4.47e3f;
 
-    /*std::random_device rd{};
-    std::mt19937 gen{ rd() };
-    std::normal_distribution<float> d{ 1e5,1e3 };*/
-
-    /*std::default_random_engine generator;
-    std::normal_distribution<float> distribution(1, 1e3);*/
     for (int i = 0; i < N; i++)
     {
         float t = ((float)rand() / RAND_MAX);
@@ -56,7 +50,6 @@ int main()
         {
             masses[i] = 1e12f;
         }
-        // masses[i] = std::max(1.0f, d(gen));
 
         float R = ((float)rand() / RAND_MAX) * 25e6 + 5e6;
         float theta = ((float)rand() / RAND_MAX) * 2 * M_PI;
@@ -65,7 +58,6 @@ int main()
         y[i] = sinf(theta) * R;
 
         float v = sqrtf(GRAVITATIONAL_CONSTANT * 6e24 / R);
-        // v *= ((float)rand() / RAND_MAX) * 0.1f + 0.95f;
         vx[i] = cosf(3 * M_PI / 2 + theta) * v;
         vy[i] = sinf(3 * M_PI / 2 + theta) * v;
     }
@@ -78,7 +70,6 @@ int main()
 
     sf::RenderWindow window(sf::VideoMode(864, 864), "Gravity Box");
     window.setFramerateLimit(60);
-
 
     std::chrono::steady_clock::time_point start, stop;
     std::chrono::milliseconds duration_update;

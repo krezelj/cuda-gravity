@@ -149,23 +149,12 @@ __global__ void UpdateAccelerationGPU(float* g_masses, float* position_x, float*
 	}
 
 	__shared__ float s_other_body_gmass[CHUNK_SIZE];
-	__shared__ float s_other_body_x[CHUNK_SIZE];
-	__shared__ float s_other_body_y[CHUNK_SIZE];
-
-	__shared__ float s_this_body_x[CHUNK_SIZE];
-	__shared__ float s_this_body_y[CHUNK_SIZE];
-
 	__shared__ float s_acceleration[CHUNK_SIZE][CHUNK_SIZE][2];
 
 	// fetch data about body
 	if (threadIdx.x == threadIdx.y)
 	{
 		s_other_body_gmass[threadIdx.x] = g_masses[globalIdxX];
-		s_other_body_x[threadIdx.x] = position_x[globalIdxX];
-		s_other_body_y[threadIdx.x] = position_y[globalIdxX];
-
-		s_this_body_x[threadIdx.y] = position_x[globalIdxY];
-		s_this_body_y[threadIdx.y] = position_y[globalIdxY];
 	}
 
 	__syncthreads();
@@ -183,19 +172,20 @@ __global__ void UpdateAccelerationGPU(float* g_masses, float* position_x, float*
 	}
 	else 
 	{
-		float dx = s_other_body_x[threadIdx.x] - s_this_body_x[threadIdx.y];
-		float dy = s_other_body_y[threadIdx.x] - s_this_body_y[threadIdx.y];
-		float r2 = dx * dx + dy * dy;
-		float r = sqrtf(r2);
+		float dx = position_x[globalIdxX] - position_x[globalIdxY];
+		float dy = position_y[globalIdxX] - position_y[globalIdxY];
 
-		float a = s_other_body_gmass[threadIdx.x] / r2;
-		s_acceleration[threadIdx.x][threadIdx.y][0] = a * dx / r;
-		s_acceleration[threadIdx.x][threadIdx.y][1] = a * dy / r;
+		float inverse_r2 = 1 / (dx * dx + dy * dy);
+		float inverse_r = sqrtf(inverse_r2);
+
+		float a = s_other_body_gmass[threadIdx.x] * inverse_r2;
+		s_acceleration[threadIdx.x][threadIdx.y][0] = a * dx * inverse_r;
+		s_acceleration[threadIdx.x][threadIdx.y][1] = a * dy * inverse_r;
 	}
 
 	__syncthreads();
 
-	//// in-block parallel sum
+	// in-block parallel sum
 	if (threadIdx.x < 4 && globalIdxX + 4 < N)
 	{
 		s_acceleration[threadIdx.x][threadIdx.y][0] += s_acceleration[threadIdx.x + 4][threadIdx.y][0];
@@ -215,11 +205,8 @@ __global__ void UpdateAccelerationGPU(float* g_masses, float* position_x, float*
 	__syncthreads();
 
 	if (threadIdx.x == 0)
-	{
-		// int data_idx = globalIdxY * gridDim.x * blockDim.z + blockIdx.x * blockDim.z + threadIdx.z;
-		// acceleration_data[data_idx] = s_acceleration[0][threadIdx.y][threadIdx.z];
-
-		// atomicAdd(&acceleration_data[2 * globalIdxY], s_acceleration[0][threadIdx.y][0]);
-		// atomicAdd(&acceleration_data[2 * globalIdxY + 1], s_acceleration[0][threadIdx.y][1]);
+	{		
+		atomicAdd(&acceleration_data[2 * globalIdxY], s_acceleration[0][threadIdx.y][0]);
+		atomicAdd(&acceleration_data[2 * globalIdxY + 1], s_acceleration[0][threadIdx.y][1]);
 	}
 }
